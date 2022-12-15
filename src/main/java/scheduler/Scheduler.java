@@ -18,8 +18,6 @@ public class Scheduler {
     }
 
     public void start() {
-        log.info("Scheduler start!!!");
-
         for (AlarmTime alarm : AlarmTime.values()) {
             setAlarm(alarm);
         }
@@ -37,7 +35,11 @@ public class Scheduler {
         return new TimerTask() {
             @Override
             public void run() {
-                alarm.run(message);
+                try {
+                    alarm.run(message);
+                } catch (Exception e) {
+                    log.error(e.getMessage());
+                }
             }
         };
     }
