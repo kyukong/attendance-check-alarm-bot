@@ -17,47 +17,40 @@ public class Slack implements Alarm {
     private static final String URL = "https://slack.com/api/chat.postMessage";
 
     private final Logger log = LoggerFactory.getLogger(Slack.class);
-    private final SlackInfo slackInfo;
+
+    private final Map<String, String> headers = new HashMap<>();
+    private final Map<String, String> parameters = new HashMap<>();
 
     public Slack() {
-        this.slackInfo = new ConfigReader().readSlackInfo();
-        log.info("slack 관련 정보를 읽어왔습니다.");
+        final SlackInfo slackInfo = ConfigReader.readSlackInfo();
+
+        headers.put("Content-Type", "application/x-www-form-urlencoded");
+        headers.put("Authorization", "Bearer " + slackInfo.getToken());
+        parameters.put("channel", slackInfo.getChannel());
     }
 
     @Override
     public void run(final String message) throws Exception {
-        final HttpURLConnection connection = createConnection();
-
-        final Map<String, String> headers = new HashMap<>();
-        headers.put("Content-Type", "application/x-www-form-urlencoded");
-        headers.put("Authorization", "Bearer " + slackInfo.getToken());
-
-        final Map<String, String> parameters = new HashMap<>();
-        parameters.put("channel", slackInfo.getChannel());
-        parameters.put("text", message);
+        final HttpURLConnection connection = (HttpURLConnection) new URL(URL).openConnection();
 
         connection.setRequestMethod("POST");
-        setHeaders(connection, headers);
-        setParameters(connection, parameters);
+        setHeaders(connection);
+        setParameters(connection, message);
         connection.setConnectTimeout(5000);
 
         connection.getResponseMessage();
-
         log.info("메시지가 전송되었습니다. [{}]", message);
     }
 
-    private HttpURLConnection createConnection() throws IOException {
-        return (HttpURLConnection) new URL(URL).openConnection();
-    }
-
-    private void setHeaders(final HttpURLConnection connection, final Map<String, String> headers) {
+    private void setHeaders(final HttpURLConnection connection) {
         for (final Map.Entry<String, String> header : headers.entrySet()) {
             connection.setRequestProperty(header.getKey(), header.getValue());
         }
     }
 
-    private void setParameters(final HttpURLConnection connection, final Map<String, String> parameters)
-        throws IOException {
+    private void setParameters(final HttpURLConnection connection, final String message) throws IOException {
+        parameters.put("text", message);
+
         connection.setDoOutput(true);
         DataOutputStream out = new DataOutputStream(connection.getOutputStream());
         out.writeBytes(convertParametersToString(parameters));
