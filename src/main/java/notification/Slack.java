@@ -11,6 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import support.ConfigReader;
+import support.ParameterMapper;
 
 public class Slack implements Alarm {
 
@@ -53,19 +54,8 @@ public class Slack implements Alarm {
 
         connection.setDoOutput(true);
         DataOutputStream out = new DataOutputStream(connection.getOutputStream());
-        out.writeBytes(convertParametersToString(parameters));
+        out.writeBytes(ParameterMapper.stringFromMap(parameters));
         out.flush();
         out.close();
-    }
-
-    private String convertParametersToString(final Map<String, String> parameters) {
-        final StringBuilder string = new StringBuilder();
-        for (final Map.Entry<String, String> parameter : parameters.entrySet()) {
-            string.append(parameter.getKey());
-            string.append("=");
-            string.append(parameter.getValue());
-            string.append("&");
-        }
-        return string.toString();
     }
 }
