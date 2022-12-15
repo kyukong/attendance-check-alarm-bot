@@ -37,3 +37,6 @@ out/
 
 ### mac ###
 *.DS_Store
+
+### application ###
+src/main/resources/application.yml

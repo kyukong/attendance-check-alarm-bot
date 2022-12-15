@@ -1,7 +1,8 @@
+import notification.Slack;
 import scheduler.Scheduler;
 
 public class Main {
     public static void main(String[] args) {
-        new Scheduler().start();
+        new Scheduler(new Slack()).start();
     }
 }

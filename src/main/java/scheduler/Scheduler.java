@@ -6,13 +6,18 @@ import java.util.TimerTask;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import notification.Alarm;
+
 public class Scheduler {
 
     private final Logger log = LoggerFactory.getLogger(Scheduler.class);
+    private final Alarm alarm;
+
+    public Scheduler(final Alarm alarm) {
+        this.alarm = alarm;
+    }
 
     public void start() {
-        log.info("Scheduler start!!!");
-
         for (AlarmTime alarm : AlarmTime.values()) {
             setAlarm(alarm);
         }
@@ -30,7 +35,11 @@ public class Scheduler {
         return new TimerTask() {
             @Override
             public void run() {
-                System.out.println(message);
+                try {
+                    alarm.run(message);
+                } catch (Exception e) {
+                    log.error(e.getMessage());
+                }
             }
         };
     }
